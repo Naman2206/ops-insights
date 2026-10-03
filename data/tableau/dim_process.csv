@@ -1,0 +1,5 @@
+process_type,sla_hours
+Intake,4.0
+Verification,8.0
+Fulfillment,24.0
+Support,6.0

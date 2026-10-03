@@ -1,0 +1,19 @@
+// Power BI measures. Load data/tableau/daily_kpis.csv as table 'KPIs' and forecast.csv as 'Forecast'.
+// Same definitions as sql/03_kpi_views.sql and the Tableau guide.
+
+Throughput        = SUM ( KPIs[orders_completed] )
+Avg Cycle Hours   = DIVIDE ( SUM ( KPIs[cycle_hours_sum] ), SUM ( KPIs[orders_completed] ) )
+Error Rate        = DIVIDE ( SUM ( KPIs[error_orders] ), SUM ( KPIs[orders_completed] ) )
+SLA Breach Rate   = DIVIDE ( SUM ( KPIs[sla_breaches] ), SUM ( KPIs[orders_completed] ) )
+
+Throughput Prior 30d =
+VAR MaxDate = MAX ( KPIs[order_date] )
+RETURN CALCULATE ( [Throughput],
+    KPIs[order_date] <= MaxDate - 30, KPIs[order_date] > MaxDate - 60,
+    REMOVEFILTERS ( KPIs[order_date] ) )
+
+Throughput Current 30d =
+VAR MaxDate = MAX ( KPIs[order_date] )
+RETURN CALCULATE ( [Throughput], KPIs[order_date] > MaxDate - 30, REMOVEFILTERS ( KPIs[order_date] ) )
+
+Throughput % Change = DIVIDE ( [Throughput Current 30d], [Throughput Prior 30d] ) - 1
